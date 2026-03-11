@@ -19,6 +19,5 @@ jobs:
           script: |
             cd ~/testing-backend
             git pull origin main
-            npm install
-            pm2 restart my-backend
-            pm2 save
+            docker compose down
+            docker compose up -d --build
