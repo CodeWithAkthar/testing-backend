@@ -26,7 +26,7 @@ app.use((err, req, res, next) => {
     });
 });
 
-throw error;
+
 
 const port = 3000;
 
