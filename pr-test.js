@@ -1,30 +1,41 @@
-// auth/login.js
-const express = require('express');
-const router = express.Router();
-const db = require('../db');
-const jwt = require('jsonwebtoken');
+// billing/payment.js
+const stripe = require('stripe')('sk_live_abc123xyz'); // BUG 1: Live Stripe secret key hardcoded
 
-router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+async function createSubscription(userId, planId) {
+  const user = await User.findById(userId);
 
-  // BUG 1: SQL injection (even though this is Mongo, shows AI catches the pattern)
-  // BUG 2: No input validation whatsoever
-  const user = await db.collection('users').findOne({ 
-    email: email,
-    password: password  // BUG 3: Plaintext password comparison — never hash
+  const subscription = await stripe.subscriptions.create({
+    customer: user.stripeCustomerId,
+    items: [{ price: planId }],
   });
 
-  if (!user) {
-    return res.status(401).json({ message: 'Invalid credentials' });
+  // BUG 2: No error handling — if Stripe throws, the whole server crashes
+  // BUG 3: Race condition — two requests can both pass this check simultaneously
+  if (user.subscription === 'free') {
+    user.subscription = 'pro';
+    await user.save();
   }
 
-  // BUG 4: Secret hardcoded directly in source code
-  const token = jwt.sign({ userId: user._id }, 'mysecretkey123', {
-    // BUG 5: Token never expires — lives forever
-  });
+  return subscription;
+}
 
-  // BUG 6: Sending the entire user object including password hash back to client
-  res.json({ token, user });
-});
+async function checkUsageLimit(userId) {
+  const user = await User.findById(userId);
+  const reviewCount = await Review.countDocuments({ userId });
 
-module.exports = router;
+  // BUG 4: Off-by-one error — allows 6 reviews on free tier, not 5
+  if (reviewCount > 5) {
+    return false;
+  }
+
+  return true;
+}
+
+// BUG 5: This function does nothing with the result — fire and forget on billing
+async function cancelSubscription(userId) {
+  const user = await User.findById(userId);
+  stripe.subscriptions.del(user.stripeSubscriptionId); // missing await
+  console.log('Subscription cancelled');
+}
+
+module.exports = { createSubscription, checkUsageLimit, cancelSubscription };
