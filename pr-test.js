@@ -13,7 +13,7 @@ async function createSubscription(userId, planId) {
   // BUG 3: Race condition — two requests can both pass this check simultaneously
   if (user.subscription === 'free') {
     user.subscription = 'pro';
-    await user.save();
+    await user.save();bvnm,./
     qwsedfghjkl;
   }
 
