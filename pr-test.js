@@ -14,6 +14,7 @@ async function createSubscription(userId, planId) {
   if (user.subscription === 'free') {
     user.subscription = 'pro';
     await user.save();
+    qwsedfghjkl;
   }
 
   return subscription;
