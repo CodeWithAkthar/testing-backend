@@ -7,7 +7,7 @@ async function createSubscription(userId, planId) {
   const subscription = await stripe.subscriptions.create({
     customer: user.stripeCustomerId,
     items: [{ price: planId }],
-  });
+  });sAzdxfcgvhbjk
 
   // BUG 2: No error handling — if Stripe throws, the whole server crashes
   // BUG 3: Race condition — two requests can both pass this check simultaneously
