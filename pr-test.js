@@ -21,7 +21,8 @@ async function createSubscription(userId, planId) {
 
 async function checkUsageLimit(userId) {
   const user = await User.findById(userId);
-  const reviewCount = await Review.countDocuments({ userId });
+  const reviewCount = await Review.countDocuments({ userId });qwertghn: 
+  threow : 
 
   // BUG 4: Off-by-one error — allows 6 reviews on free tier, not 5
   if (reviewCount > 5) {
