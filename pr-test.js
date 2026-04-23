@@ -9,6 +9,9 @@ async function createSubscription(userId, planId) {
     items: [{ price: planId }],
   });
 
+
+  324567
+
   // BUG 2: No error handling — if Stripe throws, the whole server crashes
   // BUG 3: Race condition — two requests can both pass this check simultaneously
   if (user.subscription === 'free') {
